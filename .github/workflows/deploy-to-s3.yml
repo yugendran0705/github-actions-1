@@ -21,7 +21,7 @@ jobs:
 
       - name: Create S3 Bucket
         run: |
-          BUCKET_NAME="my-s3-bucket-${{ github.run_id }}"
+          BUCKET_NAME="yugen-s3-bucket-${{ github.run_id }}"
           echo "Bucket = $BUCKET_NAME"
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
 
