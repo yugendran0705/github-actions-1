@@ -1,0 +1,36 @@
+name: Deploy S3 Bucket on Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-s3:
+    if: github.event.head_commit.message != 'skip-ci'
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Configure AWS (IAM role via EC2 Metadata)
+        run: |
+          echo "Using EC2 instance IAM role..."
+          aws sts get-caller-identity
+
+      - name: Create S3 Bucket
+        run: |
+          BUCKET_NAME="my-s3-bucket-${{ github.run_id }}"
+          echo "Bucket = $BUCKET_NAME"
+          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+
+          aws s3api create-bucket \
+            --bucket "$BUCKET_NAME" \
+            --region ap-south-1 \
+            --create-bucket-configuration LocationConstraint=ap-south-1
+
+      - name: Upload file to S3
+        run: |
+          echo "Uploading file to $BUCKET_NAME"
+          aws s3 cp ./files/demo.txt s3://$BUCKET_NAME/demo.txt
